@@ -66,15 +66,19 @@ WiFi Connect depends on NetworkManager, but by default Raspbian Stretch uses dhc
 
 Run the following in your terminal, then follow the onscreen instructions:
 
-`bash <(curl -L https://github.com/MzTechnology97/wifi-connect/raw/master/scripts/raspbian-install.sh)`
- curl https://github.com/MzTechnology97/wifi-connect/raw/master/scripts/start.sh > /home/pi/start-wifi-connect.sh
+<pre> bash <(curl -L https://github.com/MzTechnology97/wifi-connect/raw/master/scripts/raspbian-install.sh)</pre>
+<pre> curl https://github.com/MzTechnology97/wifi-connect/raw/master/scripts/start.sh > /home/pi/start-wifi-connect.sh </pre>
+<pre> sudo chmod 777 /home/pi/start-wifi-connect.sh </pre>
  
- Add a systemd script to start it on boot.
 
-sudo nano /lib/systemd/system/wifi-connect-start.service
--> contents:
+Add a systemd script to start it on boot.
 
-[Unit]
+<pre> sudo nano /lib/systemd/system/wifi-connect-start.service </pre>
+
+
+add contents:
+
+<pre>[Unit]
 Description=Balena wifi connect service
 After=NetworkManager.service
 
@@ -89,9 +93,13 @@ User=root
 
 [Install]
 WantedBy=multi-user.target
+</pre>
+
+
+
 Enable the systemd service
 
-sudo systemctl enable wifi-connect-start.service
+<pre> sudo systemctl enable wifi-connect-start.service </pre>
 
 
 
