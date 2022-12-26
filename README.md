@@ -68,64 +68,32 @@ Run the following in your terminal, then follow the onscreen instructions:
 
 `bash <(curl -L https://github.com/MzTechnology97/wifi-connect/raw/master/scripts/raspbian-install.sh)`
  curl https://gist.githubusercontent.com/MzTechnology97/wifi-connect/raw/master/scripts/start.sh > /home/pi/start-wifi-connect.sh
+ 
+ Add a systemd script to start it on boot.
 
-### balenaOS
+sudo nano /lib/systemd/system/wifi-connect-start.service
+-> contents:
 
-WiFi Connect can be integrated with a [balena.io](http://balena.io) application. (New to balena.io? Check out the [Getting Started Guide](https://balena.io/docs/#/pages/installing/gettingStarted.md).) This integration is accomplished through the use of two shared files:
-- The [Dockerfile template](./Dockerfile.template) manages dependencies. The example included here has everything necessary for WiFi Connect. Application dependencies need to be added. For help with Dockerfiles, take a look at this [guide](https://balena.io/docs/deployment/dockerfile/).
-- The [start script](./scripts/start.sh) should contain the commands that run the application. Adding these commands at the end of the script will ensure that everything kicks off after WiFi is correctly configured. 
-An example of using WiFi Connect in a Python project can be found [here](https://github.com/balena-io-projects/balena-wifi-connect-example).
+[Unit]
+Description=Balena wifi connect service
+After=NetworkManager.service
 
-### balenaOS: multicontainer app
+[Service]
+Type=simple
+ExecStart=/home/pi/start-wifi-connect.sh
+Restart=on-failure
+StandardOutput=syslog
+SyslogIdentifier=wifi-connect
+Type=idle
+User=root
 
-To use WiFi Connect on a multicontainer app you need to:
-- Set container network mode to host
-- Enable DBUS by adding the required label and environment variable (more on [balenaOS dbus](https://www.balena.io/docs/learn/develop/runtime/#dbus-communication-with-host-os))
-- Grant the container Network Admin capabilities
+[Install]
+WantedBy=multi-user.target
+Enable the systemd service
 
-Your `docker-compose.yml` file should look like this:
-```yaml
-version: "2.1"
+sudo systemctl enable wifi-connect-start.service
 
-services:
-    wifi-connect:
-        build: ./wifi-connect
-        network_mode: "host"
-        labels:
-            io.balena.features.dbus: '1'
-        cap_add:
-            - NET_ADMIN
-        environment:
-            DBUS_SYSTEM_BUS_ADDRESS: "unix:path=/host/run/dbus/system_bus_socket"
-    ...
-```
 
-***
-
-Supported boards / dongles
---------------------------
-
-WiFi Connect has been successfully tested using the following WiFi dongles:
-
-Dongle                                     | Chip
--------------------------------------------|-------------------
-[TP-LINK TL-WN722N](http://bit.ly/1P1MdAG) | Atheros AR9271
-[ModMyPi](http://bit.ly/1gY3IHF)           | Ralink RT3070
-[ThePiHut](http://bit.ly/1LfkCgZ)          | Ralink RT5370
-
-It has also been successfully tested with the onboard WiFi on a Raspberry Pi 3.
-
-Given these results, it is probable that most dongles with *Atheros* or *Ralink* chipsets will work.
-
-The following dongles are known **not** to work (as the driver is not friendly with access point mode or NetworkManager):
-
-* Official Raspberry Pi dongle (BCM43143 chip)
-* Addon NWU276 (Mediatek MT7601 chip)
-* Edimax (Realtek RTL8188CUS chip)
-
-Dongles with similar chipsets will probably not work.
-
-WiFi Connect is expected to work with all balena.io [supported boards](https://www.balena.io/docs/reference/hardware/devices/) as long as they have the [compatible dongles](https://www.balena.io/docs/reference/hardware/wifi-dongles/).
 
 ***
 
